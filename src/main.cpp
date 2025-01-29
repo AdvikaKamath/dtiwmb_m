@@ -31,13 +31,13 @@ competition Competition;
 /*  not every time that the robot is disabled.                               */
 /*---------------------------------------------------------------------------*/
 
-int driveType = 0;
+int AUTO = 0;
 
-void driveSelect(){
+void autoSelect(){
   bool selecting = true;
   bool changed = false;
 
-  Controller1.Screen.print("1: Tank");
+  Controller1.Screen.print("oneMplusoneR");
   
   while(selecting){
 
@@ -53,31 +53,31 @@ void driveSelect(){
 
     //Use left and right arrows to select auton.
     else if (!changed){
-      if(Controller1.ButtonRight.pressing() && driveType < 4){
-        driveType++;
+      if(Controller1.ButtonRight.pressing() && AUTO < 4){
+        AUTO++;
         changed = true;
       }
-      else if(Controller1.ButtonLeft.pressing() && driveType > 0){
-        driveType--;
+      else if(Controller1.ButtonLeft.pressing() && AUTO > 0){
+        AUTO--;
         changed = true;
       }
 
       Controller1.Screen.clearLine(3);
       Controller1.Screen.setCursor(3, 1);
 
-      if(driveType == 0){
-        Controller1.Screen.print("1: Tank");
+      if(AUTO == 0){
+        Controller1.Screen.print("oneMplusoneR");
         }
-      else if(driveType == 1){
-        Controller1.Screen.print("2: Arcade, Right");
+      else if(AUTO == 1){
+        Controller1.Screen.print("oneMplusoneL");
       }
-      else if(driveType == 2){
+      else if(AUTO == 2){
         Controller1.Screen.print("3: Arcade, Left");
       }
-      else if(driveType == 3){
+      else if(AUTO == 3){
         Controller1.Screen.print("4: DL, TR");
       }
-      else if(driveType == 4){
+      else if(AUTO == 4){
         Controller1.Screen.print("5: TL, DR");
       }
     }
@@ -86,7 +86,7 @@ void driveSelect(){
   Controller1.Screen.clearLine(3);
   Controller1.Screen.setCursor(3, 1);
   Controller1.rumble("--..-");
-  Controller1.Screen.print("Drivetype Selected!");
+  Controller1.Screen.print("Auton Selected!");
   wait(2 ,sec);
   Controller1.Screen.clearLine(3);
   Controller1.Screen.setCursor(3, 1);
@@ -114,18 +114,95 @@ void pre_auton(void) {
 
 void autonomous(void) {
  
-  //  Controller1.Screen.clearScreen();
-  //  Controller1.Screen.setCursor(1, 1);
-  //  Controller1.Screen.print("Auton sel %d",autonomousSelection);
-
-  // switch(autonomousSelection) {
-  //   case 0: {oneMplusoneR(true);}  // set to true when going for positive side
-  //   case 1: {oneMplusoneR(false);}   // set to false when going for negative side
-  //   default: ;
-  // }
- double distToMogo = -29;
+if(AUTO == 0){
+  double distToMogo = -30;
   double fwdLength = 17;
-  double ladder = 25;
+  double ladder = 27;
+  bool debug = false;
+  bool skills = false; 
+     // Set to true to see mssages on controller
+
+   if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(reverse,100, pct);
+  IntakeS2.spin(reverse,100, pct);
+  vex::this_thread::sleep_for(200);
+
+ if (debug) CtrlDbgPrt("Go to rings");
+  goStraight (5,true);
+
+  if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(forward,100, pct);
+  IntakeS2.spin(forward,100, pct);
+    vex::this_thread::sleep_for(800);
+    
+
+     // Stop intake
+  IntakeS1.stop();
+  IntakeS2.stop();
+  if (debug) CtrlDbgPrt("Intake Stop");
+ 
+
+    // All motors run at the same speed
+  LeftMotorGrp.setVelocity(40, pct);
+  RightMotorGrp.setVelocity(40, pct);
+
+  // Make it go forward
+  if (debug) CtrlDbgPrt("Go Forward");
+  goStraight(distToMogo, true); // Robot starts in reverse position
+
+  // mOGO CLAMP
+  
+  if (debug) CtrlDbgPrt("MOGO");
+  vex::this_thread::sleep_for(1000); // Need this not to clamp too soon
+  Mogo.set(true);
+
+  //Run intake
+   vex::this_thread::sleep_for(600); 
+  if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(fwd,100, pct);
+  IntakeS2.spin(fwd,100, pct);
+ 
+
+  // Turn
+  if (debug) CtrlDbgPrt("Turn to rings");
+  turn(-65.0, false);
+
+  vex::this_thread::sleep_for(1600);
+  if (debug) CtrlDbgPrt("Go to rings");
+  goStraight (fwdLength,true);
+    
+
+
+  //turn
+  vex::this_thread::sleep_for(2000);  
+  // Stop intake
+  IntakeS1.stop();
+  IntakeS2.stop();
+  if (debug) CtrlDbgPrt("Intake Stop");
+  
+  if (skills) {
+     turn(-95.0, true);
+     vex::this_thread::sleep_for(900);
+    goStraight(-20, true);
+     vex::this_thread::sleep_for(500);
+     Mogo.set(false);
+
+  
+  } 
+  else {
+  turn(-135.0, true);
+  if (debug) CtrlDbgPrt("Turn to ladder");  
+   vex::this_thread::sleep_for(1000);
+
+  goStraight(ladder, true);
+  if (debug) CtrlDbgPrt("Forward to ladder");
+  }
+    }
+
+    else if(AUTO == 1){
+      double distToMogo = -29;
+  double fwdLength = 17;
+  double ladder = 27;
   bool debug = false;
   bool skills = false; 
      // Set to true to see mssages on controller
@@ -173,9 +250,9 @@ void autonomous(void) {
 
   // Turn
   if (debug) CtrlDbgPrt("Turn to rings");
-  turn(-90.0, false);
+  turn(90.0, false);
 
-  vex::this_thread::sleep_for(1400);
+  vex::this_thread::sleep_for(1600);
   if (debug) CtrlDbgPrt("Go to rings");
   goStraight (fwdLength,true);
     
@@ -187,13 +264,113 @@ void autonomous(void) {
   IntakeS1.stop();
   IntakeS2.stop();
   if (debug) CtrlDbgPrt("Intake Stop");
+  
+  if (skills) {
+     turn(-95.0, true);
+     vex::this_thread::sleep_for(900);
+    goStraight(-20, true);
+     vex::this_thread::sleep_for(500);
+     Mogo.set(false);
 
-  turn(-135.0, true);
+  
+  } 
+  else {
+  turn(135.0, true);
   if (debug) CtrlDbgPrt("Turn to ladder");  
    vex::this_thread::sleep_for(1000);
 
   goStraight(ladder, true);
   if (debug) CtrlDbgPrt("Forward to ladder");
+  }
+    }
+
+    else if(AUTO == 2){
+      double forwardSpeed = Controller1.Axis3.position();
+      double turn = Controller1.Axis4.position();
+      //Dead spot if both joysticks are at low values
+      double leftSpeed = forwardSpeed + 0.4 * turn;
+      double rightSpeed = forwardSpeed - 0.4 * turn;
+      
+      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
+        RightBack.stop(coast);
+        RightFront.stop(coast);
+        RightMiddle.stop(coast);
+        LeftBack.stop(coast);
+        LeftFront.stop(coast);
+        LeftMiddle.stop(coast);
+      }
+      //Otherwise, move at the inputted speed
+
+      
+
+      else {
+        RightFront.spin(forward, rightSpeed, percent);
+        RightBack.spin(forward, rightSpeed, percent);
+        RightMiddle.spin(forward, rightSpeed, percent);
+        LeftFront.spin(forward, leftSpeed, percent);
+        LeftBack.spin(forward, leftSpeed, percent);
+        LeftMiddle.spin(forward, leftSpeed, percent);
+      }
+    }
+
+    else if(AUTO == 3){
+      double forwardSpeed = Controller1.Axis3.position();
+      double turn = Controller1.Axis1.position();
+      //Dead spot if both joysticks are at low values
+      
+      double leftSpeed = forwardSpeed + 0.4 * turn;
+      double rightSpeed = forwardSpeed - 0.4 * turn;
+      
+      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
+        RightBack.stop(coast);
+        RightFront.stop(coast);
+        RightMiddle.stop(coast);
+        LeftBack.stop(coast);
+        LeftFront.stop(coast);
+        LeftMiddle.stop(coast);
+      }
+      //Otherwise, move at the inputted speed
+
+      
+      else {
+        RightFront.spin(forward, rightSpeed, percent);
+        RightBack.spin(forward, rightSpeed, percent);
+        RightMiddle.spin(forward, rightSpeed, percent);
+        LeftFront.spin(forward, leftSpeed, percent);
+        LeftBack.spin(forward, leftSpeed, percent);
+        LeftMiddle.spin(forward, leftSpeed, percent);
+      }
+    }
+
+    else if(AUTO == 4){
+      double forwardSpeed = Controller1.Axis2.position();
+      double turn = Controller1.Axis4.position();
+      //Dead spot if both joysticks are at low values
+      
+      double leftSpeed = forwardSpeed + 0.4 * turn;
+      double rightSpeed = forwardSpeed - 0.4 * turn;
+
+      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
+        RightBack.stop(coast);
+        RightFront.stop(coast);
+        RightMiddle.stop(coast);
+        LeftBack.stop(coast);
+        LeftFront.stop(coast);
+        LeftMiddle.stop(coast);
+      }
+      //Otherwise, move at the inputted speed
+
+      
+      else {
+        RightFront.spin(forward, rightSpeed, percent);
+        RightBack.spin(forward, rightSpeed, percent);
+        RightMiddle.spin(forward, rightSpeed, percent);
+        LeftFront.spin(forward, leftSpeed, percent);
+        LeftBack.spin(forward, leftSpeed, percent);
+        LeftMiddle.spin(forward, leftSpeed, percent);
+      }
+    }
+
   
 }
 
@@ -233,40 +410,8 @@ void intakeRings () {
 void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
-
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
-
-    if(driveType == 0){
-      double right = Controller1.Axis2.position();
-      double left = Controller1.Axis3.position();
-      //Dead spot if both joysticks are at low values
-      if(fabs(left) < 10 && fabs(right) < 10){
-        RightBack.stop(coast);
-        RightFront.stop(coast);
-        RightMiddle.stop(coast);
-        LeftBack.stop(coast);
-        LeftFront.stop(coast);
-        LeftMiddle.stop(coast);
-      }
-      //Otherwise, move at the inputted speed
-      else {
-        RightFront.spin(forward, right, percent);
-        RightBack.spin(forward, right, percent);
-        RightMiddle.spin(forward, right, percent);
-        LeftFront.spin(forward, left, percent);
-        LeftBack.spin(forward, left, percent);
-        LeftMiddle.spin(forward, left, percent);
-      } 
-    }
-
-    else if(driveType == 1){
-      double forwardSpeed = Controller1.Axis2.position();
+  //  ...................................................................
+    double forwardSpeed = Controller1.Axis2.position();
       double turn = Controller1.Axis1.position();
 
       int leftSpeed = forwardSpeed + 0.4 * turn;
@@ -290,102 +435,12 @@ void usercontrol(void) {
         LeftBack.spin(forward, leftSpeed, percent);
         LeftMiddle.spin(forward, leftSpeed, percent);
       }
-    }
+  
+  
+   
 
-    else if(driveType == 2){
-      double forwardSpeed = Controller1.Axis3.position();
-      double turn = Controller1.Axis4.position();
-      //Dead spot if both joysticks are at low values
-      double leftSpeed = forwardSpeed + 0.4 * turn;
-      double rightSpeed = forwardSpeed - 0.4 * turn;
-      
-      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
-        RightBack.stop(coast);
-        RightFront.stop(coast);
-        RightMiddle.stop(coast);
-        LeftBack.stop(coast);
-        LeftFront.stop(coast);
-        LeftMiddle.stop(coast);
-      }
-      //Otherwise, move at the inputted speed
 
-      
-
-      else {
-        RightFront.spin(forward, rightSpeed, percent);
-        RightBack.spin(forward, rightSpeed, percent);
-        RightMiddle.spin(forward, rightSpeed, percent);
-        LeftFront.spin(forward, leftSpeed, percent);
-        LeftBack.spin(forward, leftSpeed, percent);
-        LeftMiddle.spin(forward, leftSpeed, percent);
-      }
-    }
-
-    else if(driveType == 3){
-      double forwardSpeed = Controller1.Axis3.position();
-      double turn = Controller1.Axis1.position();
-      //Dead spot if both joysticks are at low values
-      
-      double leftSpeed = forwardSpeed + 0.4 * turn;
-      double rightSpeed = forwardSpeed - 0.4 * turn;
-      
-      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
-        RightBack.stop(coast);
-        RightFront.stop(coast);
-        RightMiddle.stop(coast);
-        LeftBack.stop(coast);
-        LeftFront.stop(coast);
-        LeftMiddle.stop(coast);
-      }
-      //Otherwise, move at the inputted speed
-
-      
-      else {
-        RightFront.spin(forward, rightSpeed, percent);
-        RightBack.spin(forward, rightSpeed, percent);
-        RightMiddle.spin(forward, rightSpeed, percent);
-        LeftFront.spin(forward, leftSpeed, percent);
-        LeftBack.spin(forward, leftSpeed, percent);
-        LeftMiddle.spin(forward, leftSpeed, percent);
-      }
-    }
-
-    else if(driveType == 4){
-      double forwardSpeed = Controller1.Axis2.position();
-      double turn = Controller1.Axis4.position();
-      //Dead spot if both joysticks are at low values
-      
-      double leftSpeed = forwardSpeed + 0.4 * turn;
-      double rightSpeed = forwardSpeed - 0.4 * turn;
-
-      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
-        RightBack.stop(coast);
-        RightFront.stop(coast);
-        RightMiddle.stop(coast);
-        LeftBack.stop(coast);
-        LeftFront.stop(coast);
-        LeftMiddle.stop(coast);
-      }
-      //Otherwise, move at the inputted speed
-
-      
-      else {
-        RightFront.spin(forward, rightSpeed, percent);
-        RightBack.spin(forward, rightSpeed, percent);
-        RightMiddle.spin(forward, rightSpeed, percent);
-        LeftFront.spin(forward, leftSpeed, percent);
-        LeftBack.spin(forward, leftSpeed, percent);
-        LeftMiddle.spin(forward, leftSpeed, percent);
-      }
-    }
-
-    // Map Button R1 & R2 to Intake & Expel rings
-  // Works as a toggle
-  //Controller1.ButtonR1.pressed(intakeRings); commented out
-  //Controller1.ButtonR2.pressed(expelRings); commented out
-
-  // Map Button L1 to clamp and unclamp mobile goal
-  // Works as a toggle
+  
   Controller1.ButtonL1.pressed(mobileGoalClamp);
 
   // User control code here, inside the loop
@@ -449,7 +504,7 @@ int main() {
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
-  driveSelect();
+  autoSelect();
 
   // Run the pre-autonomous function.
   pre_auton();

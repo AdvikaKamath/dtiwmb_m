@@ -9,40 +9,62 @@ using namespace vex;
 
 
 void oneMplusoneR (bool positive) {
-  double distToMogo = -19;
-  double fwdLength = 16;
-  double ladder = 26;
-  bool debug = false;   // Set to true to see mssages on controller
+  double distToMogo = -29;
+  double fwdLength = 17;
+  double ladder = 27;
+  bool debug = false;
+  bool skills = false; 
+     // Set to true to see mssages on controller
 
-  // All motors run at the same speed
+   if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(reverse,100, pct);
+  IntakeS2.spin(reverse,100, pct);
+  vex::this_thread::sleep_for(200);
+
+ if (debug) CtrlDbgPrt("Go to rings");
+  goStraight (5,true);
+
+  if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(forward,100, pct);
+  IntakeS2.spin(forward,100, pct);
+    vex::this_thread::sleep_for(800);
+    
+
+     // Stop intake
+  IntakeS1.stop();
+  IntakeS2.stop();
+  if (debug) CtrlDbgPrt("Intake Stop");
+ 
+
+    // All motors run at the same speed
   LeftMotorGrp.setVelocity(40, pct);
   RightMotorGrp.setVelocity(40, pct);
 
   // Make it go forward
   if (debug) CtrlDbgPrt("Go Forward");
-  goStraight(distToMogo, false); // Robot starts in reverse position
+  goStraight(distToMogo, true); // Robot starts in reverse position
 
   // mOGO CLAMP
   
   if (debug) CtrlDbgPrt("MOGO");
-  vex::this_thread::sleep_for(800); // Need this not to clamp too soon
+  vex::this_thread::sleep_for(900); // Need this not to clamp too soon
   Mogo.set(true);
- 
 
   //Run intake
+   vex::this_thread::sleep_for(500); 
   if (debug) CtrlDbgPrt("Intake spin");
   IntakeS1.spin(fwd,100, pct);
   IntakeS2.spin(fwd,100, pct);
-  vex::this_thread::sleep_for(100);
+ 
 
   // Turn
   if (debug) CtrlDbgPrt("Turn to rings");
-  turn(-100.0, positive==false);
+  turn(-90.0, false);
 
-  vex::this_thread::sleep_for(1000);
+  vex::this_thread::sleep_for(1600);
   if (debug) CtrlDbgPrt("Go to rings");
   goStraight (fwdLength,true);
-   
+    
 
 
   //turn
@@ -51,14 +73,109 @@ void oneMplusoneR (bool positive) {
   IntakeS1.stop();
   IntakeS2.stop();
   if (debug) CtrlDbgPrt("Intake Stop");
+  
+  if (skills) {
+     turn(-95.0, true);
+     vex::this_thread::sleep_for(900);
+    goStraight(-20, true);
+     vex::this_thread::sleep_for(500);
+     Mogo.set(false);
 
-  turn(-135.0, positive==true);
-  if (debug) CtrlDbgPrt("Turn to ladder");
-
-  vex::this_thread::sleep_for(1000);
+  
+  } 
+  else {
+  turn(-135.0, true);
+  if (debug) CtrlDbgPrt("Turn to ladder");  
+   vex::this_thread::sleep_for(1000);
 
   goStraight(ladder, true);
   if (debug) CtrlDbgPrt("Forward to ladder");
+  }
+}
+
+void oneMplusoneL (bool positive) {
+  double distToMogo = -29;
+  double fwdLength = 17;
+  double ladder = 27;
+  bool debug = false;
+  bool skills = false; 
+     // Set to true to see mssages on controller
+
+   if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(reverse,100, pct);
+  IntakeS2.spin(reverse,100, pct);
+  vex::this_thread::sleep_for(200);
+
+ if (debug) CtrlDbgPrt("Go to rings");
+  goStraight (5,true);
+
+  if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(forward,100, pct);
+  IntakeS2.spin(forward,100, pct);
+    vex::this_thread::sleep_for(800);
+    
+
+     // Stop intake
+  IntakeS1.stop();
+  IntakeS2.stop();
+  if (debug) CtrlDbgPrt("Intake Stop");
+ 
+
+    // All motors run at the same speed
+  LeftMotorGrp.setVelocity(40, pct);
+  RightMotorGrp.setVelocity(40, pct);
+
+  // Make it go forward
+  if (debug) CtrlDbgPrt("Go Forward");
+  goStraight(distToMogo, true); // Robot starts in reverse position
+
+  // mOGO CLAMP
+  
+  if (debug) CtrlDbgPrt("MOGO");
+  vex::this_thread::sleep_for(900); // Need this not to clamp too soon
+  Mogo.set(true);
+
+  //Run intake
+   vex::this_thread::sleep_for(500); 
+  if (debug) CtrlDbgPrt("Intake spin");
+  IntakeS1.spin(fwd,100, pct);
+  IntakeS2.spin(fwd,100, pct);
+ 
+
+  // Turn
+  if (debug) CtrlDbgPrt("Turn to rings");
+  turn(90.0, false);
+
+  vex::this_thread::sleep_for(1600);
+  if (debug) CtrlDbgPrt("Go to rings");
+  goStraight (fwdLength,true);
+    
+
+
+  //turn
+  vex::this_thread::sleep_for(2000);  
+  // Stop intake
+  IntakeS1.stop();
+  IntakeS2.stop();
+  if (debug) CtrlDbgPrt("Intake Stop");
+  
+  if (skills) {
+     turn(-95.0, true);
+     vex::this_thread::sleep_for(900);
+    goStraight(-20, true);
+     vex::this_thread::sleep_for(500);
+     Mogo.set(false);
+
+  
+  } 
+  else {
+  turn(135.0, true);
+  if (debug) CtrlDbgPrt("Turn to ladder");  
+   vex::this_thread::sleep_for(1000);
+
+  goStraight(ladder, true);
+  if (debug) CtrlDbgPrt("Forward to ladder");
+  }
 }
 
 
