@@ -8,10 +8,54 @@ using namespace vex;
 #include "motor.cpp"
 
 
-void oneMplusoneR (bool positive) {
-  double distToMogo = -29;
-  double fwdLength = 17;
-  double ladder = 27;
+void Skills () {
+
+ // Set to true to see mssages on controller
+ 
+ LeftMotorGrp.setVelocity(50, pct);
+  RightMotorGrp.setVelocity(50, pct);
+ Mogo.set(true);
+ // Mogo clamp
+  turn(-50.0, false);
+   vex::this_thread::sleep_for(800);
+    doinker.set(true);
+
+  // Turn to rings
+  IntakeS1.spin(forward,100, pct);
+  IntakeS2.spin(forward,100, pct);
+    
+  goStraight (40, true);
+  // intake rings
+  vex::this_thread::sleep_for(2200);
+ 
+  doinker.set(false);
+
+  turn(-100.0, false);
+   vex::this_thread::sleep_for(900);
+
+  goStraight (-20, true);
+   Mogo.set(false);
+ IntakeS1.stop();
+  IntakeS2.stop();
+ vex::this_thread::sleep_for(900);
+   goStraight (19, true);
+vex::this_thread::sleep_for(900);
+  turn(92.1, false);
+vex::this_thread::sleep_for(900);
+   goStraight (-75, true);
+   vex::this_thread::sleep_for(2200);
+goStraight (-5, true);
+vex::this_thread::sleep_for(500);
+Mogo.set(true);
+  
+}
+
+
+
+void RightAuto (){
+    double distToMogo = -31;
+  double fwdLength = 18;
+  double ladder = 30;
   bool debug = false;
   bool skills = false; 
      // Set to true to see mssages on controller
@@ -47,7 +91,7 @@ void oneMplusoneR (bool positive) {
   // mOGO CLAMP
   
   if (debug) CtrlDbgPrt("MOGO");
-  vex::this_thread::sleep_for(900); // Need this not to clamp too soon
+  vex::this_thread::sleep_for(1000); // Need this not to clamp too soon
   Mogo.set(true);
 
   //Run intake
@@ -80,11 +124,9 @@ void oneMplusoneR (bool positive) {
     goStraight(-20, true);
      vex::this_thread::sleep_for(500);
      Mogo.set(false);
-
-  
   } 
   else {
-  turn(-135.0, true);
+  turn(-140.0, true);
   if (debug) CtrlDbgPrt("Turn to ladder");  
    vex::this_thread::sleep_for(1000);
 
@@ -93,10 +135,10 @@ void oneMplusoneR (bool positive) {
   }
 }
 
-void oneMplusoneL (bool positive) {
-  double distToMogo = -29;
-  double fwdLength = 17;
-  double ladder = 27;
+void LeftAuto (){
+    double distToMogo = -31;
+  double fwdLength = 18;
+  double ladder = 30;
   bool debug = false;
   bool skills = false; 
      // Set to true to see mssages on controller
@@ -132,7 +174,7 @@ void oneMplusoneL (bool positive) {
   // mOGO CLAMP
   
   if (debug) CtrlDbgPrt("MOGO");
-  vex::this_thread::sleep_for(900); // Need this not to clamp too soon
+  vex::this_thread::sleep_for(1000); // Need this not to clamp too soon
   Mogo.set(true);
 
   //Run intake
@@ -165,11 +207,9 @@ void oneMplusoneL (bool positive) {
     goStraight(-20, true);
      vex::this_thread::sleep_for(500);
      Mogo.set(false);
-
-  
   } 
   else {
-  turn(135.0, true);
+  turn(140.0, true);
   if (debug) CtrlDbgPrt("Turn to ladder");  
    vex::this_thread::sleep_for(1000);
 
@@ -177,6 +217,5 @@ void oneMplusoneL (bool positive) {
   if (debug) CtrlDbgPrt("Forward to ladder");
   }
 }
-
 
 #endif

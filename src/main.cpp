@@ -37,7 +37,7 @@ void autoSelect(){
   bool selecting = true;
   bool changed = false;
 
-  Controller1.Screen.print("oneMplusoneR");
+  Controller1.Screen.print("Skills");
   
   while(selecting){
 
@@ -66,19 +66,19 @@ void autoSelect(){
       Controller1.Screen.setCursor(3, 1);
 
       if(AUTO == 0){
-        Controller1.Screen.print("oneMplusoneR");
+        Controller1.Screen.print("Skills");
         }
       else if(AUTO == 1){
         Controller1.Screen.print("oneMplusoneL");
       }
       else if(AUTO == 2){
-        Controller1.Screen.print("3: Arcade, Left");
+        Controller1.Screen.print("oneMplusoneR");
       }
       else if(AUTO == 3){
-        Controller1.Screen.print("4: DL, TR");
+        Controller1.Screen.print("4 Ring");
       }
       else if(AUTO == 4){
-        Controller1.Screen.print("5: TL, DR");
+        Controller1.Screen.print("..");
       }
     }
   }
@@ -102,6 +102,114 @@ void pre_auton(void) {
 
 }
 
+
+// Settings
+const double kU = 0.4; // Measured for Zeigler Nichols method
+const double pU = 1.4; // measured time of oscillation in seconds
+
+double kP = 0.6*kU;      // kP = 0.6 x kU for PID         - source Wikipedia
+double kI = 1.2*kU/pU;   // kI = 1.2 x kU / pU for PID    - source Wikipedia
+double kD = 0.075*kU*pU; // kD = 0.075 x kU x pU for PID  - source Wikipedia
+
+const double tkU = 0.05; // Measured for Zeigler Nichols method
+const double tpU = 30;  // measured time of oscillation in seconds
+
+double turnkP = 0.6 * tkU;
+double turnkI = 1.2 * tkU / tpU;
+double turnkD = 0.075 * tkU * tpU; 
+
+bool enableDrivePID = false;
+
+int drivePID(double dist, double angle){
+
+  // Auto Settings
+  float desiredValue;  // 10.125 in = 360 degrees , need to scale by gear ratio
+  const float gearRatio = 1.35;
+  float desiredTurnValue;  /// angle = required*scale
+  const float angleScale = 13;
+
+  float error;  // SensorValue - DesireValue 
+  float prevError = 0;  // Position 20 milisec  onds ago 
+  float derivative; // error - prevError : Speed 
+  float totalError = 0; // totalError = totalError + error
+
+  float turnError;  // SensorValue - DesireValue 
+  float turnPrevError = 0;  // Position 20 miliseconds ago 
+  float turnDerivative; // error - prevError : Speed 
+  float turnTotalError = 0; // totalError = totalError + error
+
+  // Convert input parameter to drivetrain motor targets
+  desiredValue = dist/10.125 * 360 * gearRatio;
+  desiredTurnValue = angle * angleScale ;
+
+  // Start both sides at zero
+  LeftMotorGrp.resetPosition();
+  RightMotorGrp.resetPosition();
+
+  while(enableDrivePID){
+
+    int leftMotorPosition = LeftMotorGrp.position(degrees);
+    int rightMotorPosition = RightMotorGrp.position(degrees);
+
+    ////////////////////////////////////////////////////////
+    // Latteral Movement PID
+    ////////////////////////////////////////////////////////
+
+    // Get avrege of the two motors 
+    int averagePosition = (leftMotorPosition + rightMotorPosition )/2; 
+
+    // Potential 
+    error = desiredValue - averagePosition; 
+
+    //Derivative 
+    derivative = error - prevError; 
+
+    // Velocity -> Position -> absement 
+    if (error > 0)
+      totalError += error;
+    else 
+      totalError = 0; // Zero the integral once error goes 0 or negative
+
+    autondebug = error;
+    double lateralMotorPower  = error * kP+ derivative * kD + totalError * kI;
+
+     ////////////////////////////////////////////////////////
+    // Turning Movement PID
+    ////////////////////////////////////////////////////////
+     // Get avrege of the two motors 
+    int turnDiffrence = leftMotorPosition - rightMotorPosition; 
+
+    // Potential 
+    turnError = desiredTurnValue - turnDiffrence; 
+
+    //Derivative 
+    turnDerivative = turnError - turnPrevError; 
+
+    // Velocity -> Position -> absement 
+    if (turnError > 0)
+      turnTotalError += turnError; 
+    else
+      turnTotalError = 0;
+
+    double turnMotorPower  = turnError * turnkP+ turnDerivative * turnkD + turnTotalError * turnkI;
+
+
+    ///////////////////////////////////////////////////////////
+
+    LeftMotorGrp.spin(forward, lateralMotorPower +  turnMotorPower, vex::voltageUnits::volt);
+    RightMotorGrp.spin(forward, lateralMotorPower - turnMotorPower , vex::voltageUnits::volt);
+
+    // ...
+    prevError = error; 
+    turnPrevError = turnError;
+    vex::task::sleep(20);
+
+  }
+
+
+  return 1; 
+}
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*                              Autonomous Task                              */
@@ -113,233 +221,20 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
- 
+  enableDrivePID = true;
+ drivePID(0,90);
+ return;
+
 if(AUTO == 0){
-  double distToMogo = -30;
-  double fwdLength = 17;
-  double ladder = 27;
-  bool debug = false;
-  bool skills = false; 
-     // Set to true to see mssages on controller
-
-   if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(reverse,100, pct);
-  IntakeS2.spin(reverse,100, pct);
-  vex::this_thread::sleep_for(200);
-
- if (debug) CtrlDbgPrt("Go to rings");
-  goStraight (5,true);
-
-  if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(forward,100, pct);
-  IntakeS2.spin(forward,100, pct);
-    vex::this_thread::sleep_for(800);
-    
-
-     // Stop intake
-  IntakeS1.stop();
-  IntakeS2.stop();
-  if (debug) CtrlDbgPrt("Intake Stop");
- 
-
-    // All motors run at the same speed
-  LeftMotorGrp.setVelocity(40, pct);
-  RightMotorGrp.setVelocity(40, pct);
-
-  // Make it go forward
-  if (debug) CtrlDbgPrt("Go Forward");
-  goStraight(distToMogo, true); // Robot starts in reverse position
-
-  // mOGO CLAMP
-  
-  if (debug) CtrlDbgPrt("MOGO");
-  vex::this_thread::sleep_for(1000); // Need this not to clamp too soon
-  Mogo.set(true);
-
-  //Run intake
-   vex::this_thread::sleep_for(600); 
-  if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(fwd,100, pct);
-  IntakeS2.spin(fwd,100, pct);
- 
-
-  // Turn
-  if (debug) CtrlDbgPrt("Turn to rings");
-  turn(-65.0, false);
-
-  vex::this_thread::sleep_for(1600);
-  if (debug) CtrlDbgPrt("Go to rings");
-  goStraight (fwdLength,true);
-    
-
-
-  //turn
-  vex::this_thread::sleep_for(2000);  
-  // Stop intake
-  IntakeS1.stop();
-  IntakeS2.stop();
-  if (debug) CtrlDbgPrt("Intake Stop");
-  
-  if (skills) {
-     turn(-95.0, true);
-     vex::this_thread::sleep_for(900);
-    goStraight(-20, true);
-     vex::this_thread::sleep_for(500);
-     Mogo.set(false);
-
-  
-  } 
-  else {
-  turn(-135.0, true);
-  if (debug) CtrlDbgPrt("Turn to ladder");  
-   vex::this_thread::sleep_for(1000);
-
-  goStraight(ladder, true);
-  if (debug) CtrlDbgPrt("Forward to ladder");
-  }
+Skills();
     }
 
     else if(AUTO == 1){
-      double distToMogo = -29;
-  double fwdLength = 17;
-  double ladder = 27;
-  bool debug = false;
-  bool skills = false; 
-     // Set to true to see mssages on controller
-
-   if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(reverse,100, pct);
-  IntakeS2.spin(reverse,100, pct);
-  vex::this_thread::sleep_for(200);
-
- if (debug) CtrlDbgPrt("Go to rings");
-  goStraight (5,true);
-
-  if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(forward,100, pct);
-  IntakeS2.spin(forward,100, pct);
-    vex::this_thread::sleep_for(800);
-    
-
-     // Stop intake
-  IntakeS1.stop();
-  IntakeS2.stop();
-  if (debug) CtrlDbgPrt("Intake Stop");
- 
-
-    // All motors run at the same speed
-  LeftMotorGrp.setVelocity(40, pct);
-  RightMotorGrp.setVelocity(40, pct);
-
-  // Make it go forward
-  if (debug) CtrlDbgPrt("Go Forward");
-  goStraight(distToMogo, true); // Robot starts in reverse position
-
-  // mOGO CLAMP
-  
-  if (debug) CtrlDbgPrt("MOGO");
-  vex::this_thread::sleep_for(900); // Need this not to clamp too soon
-  Mogo.set(true);
-
-  //Run intake
-   vex::this_thread::sleep_for(500); 
-  if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(fwd,100, pct);
-  IntakeS2.spin(fwd,100, pct);
- 
-
-  // Turn
-  if (debug) CtrlDbgPrt("Turn to rings");
-  turn(90.0, false);
-
-  vex::this_thread::sleep_for(1600);
-  if (debug) CtrlDbgPrt("Go to rings");
-  goStraight (fwdLength,true);
-    
-
-
-  //turn
-  vex::this_thread::sleep_for(2000);  
-  // Stop intake
-  IntakeS1.stop();
-  IntakeS2.stop();
-  if (debug) CtrlDbgPrt("Intake Stop");
-  
-  if (skills) {
-     turn(-95.0, true);
-     vex::this_thread::sleep_for(900);
-    goStraight(-20, true);
-     vex::this_thread::sleep_for(500);
-     Mogo.set(false);
-
-  
-  } 
-  else {
-  turn(135.0, true);
-  if (debug) CtrlDbgPrt("Turn to ladder");  
-   vex::this_thread::sleep_for(1000);
-
-  goStraight(ladder, true);
-  if (debug) CtrlDbgPrt("Forward to ladder");
-  }
+      LeftAuto(); 
     }
 
     else if(AUTO == 2){
-      double forwardSpeed = Controller1.Axis3.position();
-      double turn = Controller1.Axis4.position();
-      //Dead spot if both joysticks are at low values
-      double leftSpeed = forwardSpeed + 0.4 * turn;
-      double rightSpeed = forwardSpeed - 0.4 * turn;
-      
-      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
-        RightBack.stop(coast);
-        RightFront.stop(coast);
-        RightMiddle.stop(coast);
-        LeftBack.stop(coast);
-        LeftFront.stop(coast);
-        LeftMiddle.stop(coast);
-      }
-      //Otherwise, move at the inputted speed
-
-      
-
-      else {
-        RightFront.spin(forward, rightSpeed, percent);
-        RightBack.spin(forward, rightSpeed, percent);
-        RightMiddle.spin(forward, rightSpeed, percent);
-        LeftFront.spin(forward, leftSpeed, percent);
-        LeftBack.spin(forward, leftSpeed, percent);
-        LeftMiddle.spin(forward, leftSpeed, percent);
-      }
-    }
-
-    else if(AUTO == 3){
-      double forwardSpeed = Controller1.Axis3.position();
-      double turn = Controller1.Axis1.position();
-      //Dead spot if both joysticks are at low values
-      
-      double leftSpeed = forwardSpeed + 0.4 * turn;
-      double rightSpeed = forwardSpeed - 0.4 * turn;
-      
-      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
-        RightBack.stop(coast);
-        RightFront.stop(coast);
-        RightMiddle.stop(coast);
-        LeftBack.stop(coast);
-        LeftFront.stop(coast);
-        LeftMiddle.stop(coast);
-      }
-      //Otherwise, move at the inputted speed
-
-      
-      else {
-        RightFront.spin(forward, rightSpeed, percent);
-        RightBack.spin(forward, rightSpeed, percent);
-        RightMiddle.spin(forward, rightSpeed, percent);
-        LeftFront.spin(forward, leftSpeed, percent);
-        LeftBack.spin(forward, leftSpeed, percent);
-        LeftMiddle.spin(forward, leftSpeed, percent);
-      }
+     RightAuto();
     }
 
     else if(AUTO == 4){
@@ -408,6 +303,12 @@ void intakeRings () {
 
 
 void usercontrol(void) {
+
+  enableDrivePID = false;
+
+  Controller1.ButtonX.pressed(Doinker);
+  Controller1.ButtonL1.pressed(mobileGoalClamp);
+
   // User control code here, inside the loop
   while (1) {
   //  ...................................................................
@@ -416,7 +317,7 @@ void usercontrol(void) {
 
       int leftSpeed = forwardSpeed + 0.4 * turn;
       int rightSpeed = forwardSpeed - 0.4 * turn;
-      //Dead spot if both joysticks are at low values
+      //Dead stop if both joysticks are at low values
       if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
         RightBack.stop(coast);
         RightFront.stop(coast);
@@ -436,36 +337,10 @@ void usercontrol(void) {
         LeftMiddle.spin(forward, leftSpeed, percent);
       }
   
-  
-   
-
-
-  
-  Controller1.ButtonL1.pressed(mobileGoalClamp);
-
-  // User control code here, inside the loop
+    // User control code here, inside the loop
 
     intakeFunction();
-   // Read the joystick values
-    //int forward = Controller1.Axis2.position();  // Left joystick Y-axis
-    //int turn = Controller1.Axis1.position();     // Left joystick X-axis
-
-    // Calculate the speed for each side
-    // Scale down to reduce speed
-    //int leftSpeed  = forward + turn;
-    //int rightSpeed = forward - turn;
-
-    // Set the motor speeds
- 
-     //LeftMotorGrp.spin(fwd,leftSpeed,pct);
-    // LeftBack.spin(fwd, leftSpeed, pct);
-    // LeftFront.spin(fwd, leftSpeed, pct);
-    // LeftMiddle.spin(fwd, leftSpeed, pct);
-      //RightMotorGrp.spin(fwd, rightSpeed, pct);
-    // RightBack.spin(fwd, rightSpeed, pct);
-    // RightFront.spin(fwd, rightSpeed, pct);
-    // RightMiddle.spin(fwd, rightSpeed, pct);
-
+  
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
@@ -476,41 +351,15 @@ void usercontrol(void) {
 // Main will set up the competition functions and callbacks.
 //
 int main() {
-  // Run the pre-autonomous function.
-
-  // // Set up callbacks for autonomous and driver control periods.
-  // Competition.autonomous(autonomous);
-  // Competition.drivercontrol(usercontrol);
-
-  //   // register events for button selection
-  //   Brain.Screen.pressed( userTouchCallbackPressed );
-  //   Brain.Screen.released( userTouchCallbackReleased );
-
-  //   // make nice background
-  //   Brain.Screen.setFillColor( vex::color(0x404040) );
-  //   Brain.Screen.setPenColor( vex::color(0x404040) );
-  //   Brain.Screen.drawRectangle( 0, 0, 480, 120 );
-  //   Brain.Screen.setFillColor( vex::color(0x808080) );
-  //   Brain.Screen.setPenColor( vex::color(0x808080) );
-  //   Brain.Screen.drawRectangle( 0, 120, 480, 120 );
-
-  //   // initial display
-  //   displayButtonControls( 0, false );
-
-
-  // Prevent main from exiting with an infinite loop.
-
-    // Set up callbacks for autonomous and driver control periods.
+ 
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
   autoSelect();
-
-  // Run the pre-autonomous function.
   pre_auton();
 
   while (true) {
     printTemps();  // Prints motor temperature on the controller
-    wait(100, msec);
+    wait(1, sec);
   }
 }

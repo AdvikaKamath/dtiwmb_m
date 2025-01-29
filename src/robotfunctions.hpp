@@ -3,6 +3,8 @@
 #include "vex.h"
 #include "robotdevices.h"
 
+// Globals for robotfunctions
+int autondebug = -1;
 
 
 
@@ -55,59 +57,79 @@ void intakeFunction(){
 }
 
 void mobileGoalClamp() {
-    static bool clampOn;
+    static bool clampOn ;
 
-    if (clampOn == false) {
-      Mogo.set(true);
-      // For debugging
-      Controller1.Screen.print("clamp On: %d",clampOn);
-      Controller1.Screen.newLine();
-      clampOn = true;
-    } else {
-      Mogo.set(false);
-      // For debugging
-      Controller1.Screen.print("clamp Off: %d",clampOn);
-      Controller1.Screen.newLine();
-      clampOn = false;
-    }
+    // For debugging
+    // Controller1.Screen.print("clamp Off: %d",clampOn);
+    // Controller1.Screen.newLine();
+
+    Mogo.set(clampOn);
+    clampOn = not clampOn;
+    vex::this_thread::sleep_for(100);
+}
+
+
+void Doinker() {
+    static bool DoinkerOn;
+
+    // For debugging
+    // Controller1.Screen.print("Doinker On: %d",DoinkerOn);
+    // Controller1.Screen.newLine();
+    doinker.set(DoinkerOn);
+    DoinkerOn = not DoinkerOn;
     vex::this_thread::sleep_for(100);
 }
 
 /*
  This function prints the motor temperatures on controller screen
 */
+
+int printcount = 0;
+
 void printTemps() {
+
+const int TOTALLINES = 3;
+
 float LeftMTemp = LeftMotorGrp.temperature();
 float RightMTemp = RightMotorGrp.temperature();
 float IntakeTemp = IntakeS2.temperature();
 
-    Controller1.Screen.setCursor(2,1);
-    if(LeftMTemp <= 40){
-      Controller1.Screen.print(":D LM: %1.0f", LeftMTemp);
-    }else if(LeftMTemp <= 55){
-      Controller1.Screen.print(":) LM: %1.0f", LeftMTemp);
-    }else{
-      Controller1.Screen.print(":( LM: %1.0f", LeftMTemp);
-    }
+  //Controller1.Screen.clearScreen();
 
-
-     if(RightMTemp<= 40){
-      Controller1.Screen.print(":D RM: %1.0f", RightMTemp);
-    }else if(RightMTemp <= 55){
-      Controller1.Screen.print(":) RM: %1.0f", RightMTemp);
-    }else{
-      Controller1.Screen.print(":( RM: %1.0f", RightMTemp);
-    }
-    Controller1.Screen.newLine();
+  if (printcount % TOTALLINES == 0) {
+      Controller1.Screen.setCursor(2,1);
+      if(LeftMTemp <= 40){
+        Controller1.Screen.print(":D LM: %1.0f", LeftMTemp);
+      } else if(LeftMTemp <= 55){
+        Controller1.Screen.print(":) LM: %1.0f", LeftMTemp);
+      } else{
+        Controller1.Screen.print(":( LM: %1.0f", LeftMTemp);
+      }
  
- if(IntakeTemp<= 40){
-      Controller1.Screen.print(":D Intake: %1.0f", IntakeTemp);
-    }else if(IntakeTemp <= 55){
-      Controller1.Screen.print(":) Intake: %1.0f", IntakeTemp);
-    }else{
-      Controller1.Screen.print(":( Intake: %1.0f", IntakeTemp);
-    }
+      if(RightMTemp<= 40){
+        Controller1.Screen.print(":D RM: %1.0f", RightMTemp);
+      } else if(RightMTemp <= 55){
+        Controller1.Screen.print(":) RM: %1.0f", RightMTemp);
+      }else{
+        Controller1.Screen.print(":( RM: %1.0f", RightMTemp);
+      }
+      Controller1.Screen.newLine();
+  }
 
+  if (printcount % TOTALLINES == 1) {
+      Controller1.Screen.setCursor(2,1);
+      if(IntakeTemp<= 40){
+        Controller1.Screen.print(":D IM: %1.0f", IntakeTemp);
+      } else if(IntakeTemp <= 55){
+        Controller1.Screen.print(":) IM: %1.0f", IntakeTemp);
+      } else{
+        Controller1.Screen.print(":( IM: %1.0f", IntakeTemp);
+      }
+      Controller1.Screen.print("PID %c",autondebug);
+      Controller1.Screen.newLine();
+  }
+
+  printcount++ ;
 }
 
 #endif

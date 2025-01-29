@@ -28,5 +28,6 @@ motor_group IntakesGrp = motor_group(IntakeS1, IntakeS2);
 
 
 pneumatics Mogo    = pneumatics(Brain.ThreeWirePort.A);
+pneumatics doinker    = pneumatics(Brain.ThreeWirePort.C);
 //limit lswitch;
 #endif
