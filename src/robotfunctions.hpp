@@ -37,14 +37,14 @@ void intakeFunction(){
 
   if (Controller1.ButtonR1.pressing()){
 
-    IntakeS1.spin(forward,80,percent); //change Speed of the intake
+    IntakeS1.spin(forward,100,percent); //change Speed of the intake
     IntakeS2.spin(forward,100,percent); //Change Speed of the convayer belt
 
   }
 
   else if (Controller1.ButtonR2.pressing()){
 
-    IntakeS1.spin(reverse,80,percent);
+    IntakeS1.spin(reverse,100,percent);
     IntakeS2.spin(reverse,90,percent);
 
   }
@@ -57,28 +57,42 @@ void intakeFunction(){
 }
 
 void mobileGoalClamp() {
-    static bool clampOn ;
+    // static bool clampOn ;
+    static bool clamp;
 
-    // For debugging
-    // Controller1.Screen.print("clamp Off: %d",clampOn);
-    // Controller1.Screen.newLine();
+    if (clamp == false) {
+      Mogo.set(true);
+      clamp = true;
+     }
+      else {
+      Mogo.set (false); 
+      clamp = false;
+     }
 
-    Mogo.set(clampOn);
-    clampOn = not clampOn;
     vex::this_thread::sleep_for(100);
+
+
+
 }
 
 
 void Doinker() {
-    static bool DoinkerOn;
+   
+ static bool yoinker;
 
-    // For debugging
-    // Controller1.Screen.print("Doinker On: %d",DoinkerOn);
-    // Controller1.Screen.newLine();
-    doinker.set(DoinkerOn);
-    DoinkerOn = not DoinkerOn;
-    vex::this_thread::sleep_for(100);
+    if (yoinker == false) {
+      doinker.set (true);
+      yoinker = true;
+     }
+     else {
+      doinker.set (false); 
+      yoinker = false;
+     }
+     vex::this_thread::sleep_for(100);
+
+
 }
+
 
 /*
  This function prints the motor temperatures on controller screen
@@ -131,5 +145,6 @@ float IntakeTemp = IntakeS2.temperature();
 
   printcount++ ;
 }
+
 
 #endif
