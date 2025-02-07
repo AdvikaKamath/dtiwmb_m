@@ -104,7 +104,7 @@ void pre_auton(void) {
 
 
 // Settings
-const double kU = 0.4; // Measured for Zeigler Nichols method
+const double kU = 0.3; // Measured for Zeigler Nichols method
 const double pU = 1.4; // measured time of oscillation in seconds
 
 double kP = 0.6*kU;      // kP = 0.6 x kU for PID         - source Wikipedia
@@ -127,12 +127,15 @@ int drivePID(double dist, double angle){
   const float gearRatio = 1.35;
   float desiredTurnValue;  /// angle = required*scale
   const float angleScale = 13;
+  const float angleBias  = 0;
+  const float leftMotorScale = 1.0;
+  const float rightMotorScale = 0.83;
 
   float error;  // SensorValue - DesireValue 
   float prevError = 0;  // Position 20 milisec  onds ago 
   float derivative; // error - prevError : Speed 
   float totalError = 0; // totalError = totalError + error
-
+ 
   float turnError;  // SensorValue - DesireValue 
   float turnPrevError = 0;  // Position 20 miliseconds ago 
   float turnDerivative; // error - prevError : Speed 
@@ -140,7 +143,7 @@ int drivePID(double dist, double angle){
 
   // Convert input parameter to drivetrain motor targets
   desiredValue = dist/10.125 * 360 * gearRatio;
-  desiredTurnValue = angle * angleScale ;
+  desiredTurnValue = (angle - angleBias) * angleScale ;
 
   // Start both sides at zero
   LeftMotorGrp.resetPosition();
@@ -159,16 +162,17 @@ int drivePID(double dist, double angle){
     int averagePosition = (leftMotorPosition + rightMotorPosition )/2; 
 
     // Potential 
-    error = desiredValue - averagePosition; 
+    error  = desiredValue - averagePosition; 
 
     //Derivative 
-    derivative = error - prevError; 
+    derivative  = error - prevError; 
 
     // Velocity -> Position -> absement 
-    if (error > 0)
+    if (error > 0) 
       totalError += error;
     else 
       totalError = 0; // Zero the integral once error goes 0 or negative
+
 
     autondebug = error;
     double lateralMotorPower  = error * kP+ derivative * kD + totalError * kI;
@@ -196,11 +200,12 @@ int drivePID(double dist, double angle){
 
     ///////////////////////////////////////////////////////////
 
-    LeftMotorGrp.spin(forward, lateralMotorPower +  turnMotorPower, vex::voltageUnits::volt);
-    RightMotorGrp.spin(forward, lateralMotorPower - turnMotorPower , vex::voltageUnits::volt);
+    LeftMotorGrp.spin(forward, lateralMotorPower*leftMotorScale +  turnMotorPower, vex::voltageUnits::volt);
+    RightMotorGrp.spin(forward, lateralMotorPower*rightMotorScale - turnMotorPower , vex::voltageUnits::volt);
 
     // ...
     prevError = error; 
+
     turnPrevError = turnError;
     vex::task::sleep(20);
 
@@ -222,8 +227,9 @@ int drivePID(double dist, double angle){
 
 void autonomous(void) {
   enableDrivePID = true;
- drivePID(0,90);
- return;
+ drivePID(40,0);
+/// Temporary break
+return;
 
 if(AUTO == 0){
 Skills();
