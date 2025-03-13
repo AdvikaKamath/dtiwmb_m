@@ -99,6 +99,10 @@ void pre_auton(void) {
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
+{
+  WallStakes.resetPosition();
+}
+
 
 }
 
@@ -138,8 +142,8 @@ Skills();
       double turn = Controller1.Axis4.position();
       //Dead spot if both joysticks are at low values
       
-      double leftSpeed = forwardSpeed + 0.4 * turn;
-      double rightSpeed = forwardSpeed - 0.4 * turn;
+      double leftSpeed = forwardSpeed + 0.9 * turn;
+      double rightSpeed = forwardSpeed - 0.9 * turn;
 
       if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
         RightBack.stop(coast);
@@ -178,42 +182,25 @@ Skills();
 /*---------------------------------------------------------------------------*/
 
 
-void intakeRings () {
-    static bool intakeOn;
-    intakeOn = intakeOn && (IntakeS1.direction()==forward); 
-    
-    if (intakeOn==false) {
-        IntakeS1.spin(fwd, 100, pct);
-        IntakeS2.spin(fwd, 100, pct);
-        intakeOn = true;
-        
-    } else {
-        IntakeS1.stop(coast);
-        IntakeS2.stop(coast);  
-        intakeOn = false;
-       
-  
-    }
-    vex::this_thread::sleep_for(100);
-}
+
 
 
 void usercontrol(void) {
+  int shawtyBae = 0;
+
 
   // enableDrivePID = false;
-
 
   // User control code here, inside the loop
   while (1) {
 
-    Controller1.ButtonX.pressed(Doinker);
-  Controller1.ButtonL1.pressed(mobileGoalClamp);
+   
   //  ...................................................................
     double forwardSpeed = Controller1.Axis2.position();
       double turn = Controller1.Axis1.position();
 
-      int leftSpeed = forwardSpeed + 0.7 * turn;
-      int rightSpeed = forwardSpeed - 0.6 * turn;
+      int leftSpeed = forwardSpeed + 0.5 * turn;
+      int rightSpeed = forwardSpeed - 0.5 * turn;
       //Dead stop if both joysticks are at low values
       if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
         RightBack.stop(coast);
@@ -236,7 +223,59 @@ void usercontrol(void) {
   
     // User control code here, inside the loop
 
+    // Controller1.ButtonUp.pressed (nextStates);
+
+    Controller1.ButtonX.pressed(Doinker);
+    Controller1.ButtonL1.pressed(mobileGoalClamp);
+
     intakeFunction();
+
+
+
+
+    ////
+      if (Controller1.ButtonL2.pressing()){
+      IntakeS2.setVelocity(30, pct);
+      }
+
+      else {
+        IntakeS2.setVelocity(80, pct);
+      }
+
+
+    if (Controller1.ButtonLeft.PRESSED){
+      shawtyBae = 1;
+      WallStakesMacro(4.5);
+    }
+
+    if(Controller1.ButtonUp.pressing()){
+      if ( shawtyBae == 1) {
+      wait (200, msec);
+      IntakeS2.spin(reverse,20, pct);
+      wait (900, msec);
+      IntakeS2.stop();
+      shawtyBae = 0;
+      }
+
+      else {
+        WallStakes.setVelocity(85, percent);
+        WallStakes.spin(forward);
+      }
+
+      
+    
+      }
+    
+      else if(Controller1.ButtonDown.pressing()){
+      WallStakes.setVelocity(100, percent);
+      WallStakes.spin(reverse);
+      }
+      else{
+      WallStakes.stop(hold);
+      }
+      
+      
+      
   
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.

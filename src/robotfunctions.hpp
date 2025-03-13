@@ -6,6 +6,70 @@
 // Globals for robotfunctions
 int autondebug = -1;
 
+  void WallStakesMacro(double targetPosition){
+
+
+    double kp = 0.01;
+    WallStakes.setPosition(0,degrees);
+    
+    double realTarget = (targetPosition*15);
+    double error = 0.0;
+    double output = 0.0;
+    
+    
+    double tolerance = 1.0;
+    double speedLimit = 50;
+    
+    
+    while (true) {
+    // get the error
+    double currentPosition = WallStakes.position(degrees); // motor positions
+    error = realTarget - currentPosition;
+    
+    
+    // output
+    output = kp * error;
+    
+    
+    if (output > 120.0) {
+    output = 120.0;
+    } else if (output < -120.0) {
+    output = -120.0;
+    }
+    
+    
+    
+    
+    
+    output *= speedLimit;
+    
+    
+    // spins motors
+    WallStakes.spin(forward, output, percent);
+    
+    // checks to see if within tolerance
+    if (fabs(error) < tolerance) {
+    // Stop all motors
+    LeftFront.stop();
+    LeftMiddle.stop();
+    LeftBack.stop(brake);
+    RightFront.stop();
+    RightMiddle.stop();
+    RightBack.stop(brake);
+    wait(20,msec); // wait so commands have time to work
+    break; //
+    }
+    
+    
+    wait(20,msec); //
+    }
+    
+    }
+    
+
+
+
+
 
 
 void expelRings() {
@@ -13,21 +77,37 @@ void expelRings() {
     expelOn = expelOn && (IntakeS1.direction()==reverse);
     if (expelOn==false) {
         IntakeS1.spin(reverse, 100, pct);
-        IntakeS2.spin(reverse, 100, pct);
-        // For debugging
-        Brain.Screen.print("expel Start: %d %d",expelOn,(IntakeS1.direction()==reverse));
-        Brain.Screen.newLine();
+        IntakeS2.spin(reverse, 80, pct);
         expelOn = true;
     } else {
         IntakeS1.stop(brake);
         IntakeS2.stop(brake);       
-        // For debugging
-        Brain.Screen.print("expel Stop: %d %d",expelOn,(IntakeS1.direction()==reverse));
-        Brain.Screen.newLine();
         expelOn = false;
     }
     vex::this_thread::sleep_for(100);
 }
+
+void intakeRings () {
+  static bool intakeOn;
+  intakeOn = intakeOn && (IntakeS1.direction()==forward); 
+  
+  if (intakeOn==false) {
+      IntakeS1.spin(fwd, 100, pct);
+      IntakeS2.spin(fwd, 85, pct);
+      intakeOn = true;
+      
+  } else {
+      IntakeS1.stop(coast);
+      IntakeS2.stop(coast);  
+      intakeOn = false;
+     
+
+  }
+  vex::this_thread::sleep_for(100);
+}
+
+
+
 
 
 void intakeFunction(){
@@ -35,25 +115,16 @@ void intakeFunction(){
   //IntakeS1.setVelocity(100,percent);
   //IntakeS2.setVelocity(100,percent);
 
-  if (Controller1.ButtonR1.pressing()){
-
-    IntakeS1.spin(forward,100,percent); //change Speed of the intake
-    IntakeS2.spin(forward,100,percent); //Change Speed of the convayer belt
+  if (Controller1.ButtonR1.PRESSED){
+    intakeRings();
 
   }
 
-  else if (Controller1.ButtonR2.pressing()){
-
-    IntakeS1.spin(reverse,100,percent);
-    IntakeS2.spin(reverse,90,percent);
+  else if (Controller1.ButtonR2.PRESSED){
+    expelRings();
 
   }
 
-  else {
-    IntakeS1.stop();
-    IntakeS2.stop();
-
-  }
 }
 
 void mobileGoalClamp() {
@@ -129,21 +200,6 @@ float IntakeTemp = IntakeS2.temperature();
       }
       Controller1.Screen.newLine();
   }
-
-  if (printcount % TOTALLINES == 1) {
-      Controller1.Screen.setCursor(2,1);
-      if(IntakeTemp<= 40){
-        Controller1.Screen.print(":D IM: %1.0f", IntakeTemp);
-      } else if(IntakeTemp <= 55){
-        Controller1.Screen.print(":) IM: %1.0f", IntakeTemp);
-      } else{
-        Controller1.Screen.print(":( IM: %1.0f", IntakeTemp);
-      }
-      Controller1.Screen.print("PID %c",autondebug);
-      Controller1.Screen.newLine();
-  }
-
-  printcount++ ;
 }
 
 

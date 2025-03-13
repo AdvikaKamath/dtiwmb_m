@@ -154,8 +154,8 @@ Mogo.set(true);
 
 void RightAuto (){
     double distToMogo = -31;
-  double fwdLength = 20;
-  double ladder = 31;
+  double fwdLength = 23;
+  double ladder = 35;
   bool debug = false;
   bool skills = false; 
      // Set to true to see mssages on controller
@@ -203,12 +203,16 @@ void RightAuto (){
 
   // Turn
   if (debug) CtrlDbgPrt("Turn to rings");
-  turn(-87.0, false);
+  turn(-80.0, false);
 
   vex::this_thread::sleep_for(1600);
   if (debug) CtrlDbgPrt("Go to rings");
   goStraight (fwdLength,true);
     
+      vex::this_thread::sleep_for(200);
+   turn(10.0, false);
+    vex::this_thread::sleep_for(200); 
+
 
 
   //turn
@@ -222,14 +226,14 @@ void RightAuto (){
   if (debug) CtrlDbgPrt("Turn to ladder");  
    vex::this_thread::sleep_for(1000);
 
-  goStraight(ladder, true);
-  if (debug) CtrlDbgPrt("Forward to ladder");
+  // goStraight(ladder, true);
+  // if (debug) CtrlDbgPrt("Forward to ladder");
 }
 
 void LeftAuto (){
     double distToMogo = -31;
-  double fwdLength = 20;
-  double ladder = 31;
+  double fwdLength = 23;
+  double ladder = 35;
   bool debug = false;
   bool skills = false; 
      // Set to true to see mssages on controller
@@ -277,12 +281,15 @@ void LeftAuto (){
 
   // Turn
   if (debug) CtrlDbgPrt("Turn to rings");
-  turn(87.0, false);
+  turn(80.0, false);
 
   vex::this_thread::sleep_for(1600);
   if (debug) CtrlDbgPrt("Go to rings");
   goStraight (fwdLength,true);
-    
+
+  vex::this_thread::sleep_for(200);
+   turn(-10.0, false);
+    vex::this_thread::sleep_for(200); 
 
 
   //turn
@@ -296,8 +303,8 @@ void LeftAuto (){
   if (debug) CtrlDbgPrt("Turn to ladder");  
    vex::this_thread::sleep_for(1000);
 
-  goStraight(ladder, true);
-  if (debug) CtrlDbgPrt("Forward to ladder");
+  // goStraight(ladder, true);
+  // if (debug) CtrlDbgPrt("Forward to ladder");
   
 }
 
