@@ -20,7 +20,7 @@ void CtrlDbgPrt (const char * str) {
 }
 
 void goStraight (double dist, bool front) {
-  const double  INCH_TO_DEG = 360*3.0/19;    // Measured on 11/28/2024 - 3 rotations : 22.5 in 
+  const double  INCH_TO_DEG = 360*1.5/19;    // Measured on 11/28/2024 - 3 rotations : 22.5 in 
   const uint32_t WAIT_TIME    = 300;          // in milliseconds
 
   double  currentLeftPos  = LeftMotorGrp.position(degrees);
@@ -37,8 +37,8 @@ void goStraight (double dist, bool front) {
 }
 
 void turn (double angle, bool left) {
-  const double  INCH_TO_DEG   = 360*3.0/19;    // Measured on 11/28/2024 - 3 rotations : 22.5 in 
-  const double  TURN_RADIUS   = 8;            // Measured on 11/29
+  const double  INCH_TO_DEG   = 360*1.3/19;    // Measured on 11/28/2024 - 3 rotations : 22.5 in 
+  const double  TURN_RADIUS   = 10;            // Measured on 11/29
   const uint32_t WAIT_TIME    = 300;          // in milliseconds
 
   double linearDegree = TURN_RADIUS * 2 * M_PI * angle / 360;

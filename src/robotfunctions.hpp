@@ -9,7 +9,7 @@ int autondebug = -1;
   void WallStakesMacro(double targetPosition){
 
 
-    double kp = 0.01;
+    double kp = 0.02;
     WallStakes.setPosition(0,degrees);
     
     double realTarget = (targetPosition*15);
@@ -31,10 +31,10 @@ int autondebug = -1;
     output = kp * error;
     
     
-    if (output > 120.0) {
-    output = 120.0;
-    } else if (output < -120.0) {
-    output = -120.0;
+    if (output > 150.0) {
+    output = 150.0;
+    } else if (output < -150.0) {
+    output = -150.0;
     }
     
     
@@ -115,16 +115,21 @@ void intakeFunction(){
   //IntakeS1.setVelocity(100,percent);
   //IntakeS2.setVelocity(100,percent);
 
-  if (Controller1.ButtonR1.PRESSED){
-    intakeRings();
-
+  if (Controller1.ButtonR1.pressing()){
+    IntakeS1.spin(forward, 100, pct);
+    IntakeS2.spin(forward, 100, pct);
   }
 
-  else if (Controller1.ButtonR2.PRESSED){
-    expelRings();
-
+  else if (Controller1.ButtonR2.pressing()){
+    IntakeS1.spin(reverse, 100, pct);
+   IntakeS2.spin(reverse, 100, pct);
   }
 
+  else {
+      IntakeS1.stop(coast);
+      IntakeS2.stop(coast);
+
+  }
 }
 
 void mobileGoalClamp() {
@@ -138,6 +143,9 @@ void mobileGoalClamp() {
       else {
       Mogo.set (false); 
       clamp = false;
+     
+    
+
      }
 
     vex::this_thread::sleep_for(100);

@@ -120,51 +120,49 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  // enableDrivePID = false;
-//  drivePID(134,0);
-/// Temporary break
-// return;
 
-if(AUTO == 0){
-Skills();
-    }
+  RightAuto();
 
-    else if(AUTO == 1){
-      LeftAuto(); 
-    }
+// if(AUTO == 0){
+// Skills();
+//     }
 
-    else if(AUTO == 2){
-     RightAuto();
-    }
+//     else if(AUTO == 1){
+//       LeftAuto(); 
+//     }
 
-    else if(AUTO == 4){
-      double forwardSpeed = Controller1.Axis2.position();
-      double turn = Controller1.Axis4.position();
-      //Dead spot if both joysticks are at low values
+//     else if(AUTO == 2){
+//      RightAuto();
+//     }
+
+//     else if(AUTO == 4){
+//       double forwardSpeed = Controller1.Axis2.position();
+//       double turn = Controller1.Axis4.position();
+//       //Dead spot if both joysticks are at low values
       
-      double leftSpeed = forwardSpeed + 0.9 * turn;
-      double rightSpeed = forwardSpeed - 0.9 * turn;
+//       double leftSpeed = forwardSpeed + 0.9 * turn;
+//       double rightSpeed = forwardSpeed - 0.9 * turn;
 
-      if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
-        RightBack.stop(coast);
-        RightFront.stop(coast);
-        RightMiddle.stop(coast);
-        LeftBack.stop(coast);
-        LeftFront.stop(coast);
-        LeftMiddle.stop(coast);
-      }
-      //Otherwise, move at the inputted speed
+//       if(fabs(forwardSpeed) < 10 && fabs(turn) < 5){
+//         RightBack.stop(coast);
+//         RightFront.stop(coast);
+//         RightMiddle.stop(coast);
+//         LeftBack.stop(coast);
+//         LeftFront.stop(coast);
+//         LeftMiddle.stop(coast);
+//       }
+//       //Otherwise, move at the inputted speed
 
       
-      else {
-        RightFront.spin(forward, rightSpeed, percent);
-        RightBack.spin(forward, rightSpeed, percent);
-        RightMiddle.spin(forward, rightSpeed, percent);
-        LeftFront.spin(forward, leftSpeed, percent);
-        LeftBack.spin(forward, leftSpeed, percent);
-        LeftMiddle.spin(forward, leftSpeed, percent);
-      }
-    }
+//       else {
+//         RightFront.spin(forward, rightSpeed, percent);
+//         RightBack.spin(forward, rightSpeed, percent);
+//         RightMiddle.spin(forward, rightSpeed, percent);
+//         LeftFront.spin(forward, leftSpeed, percent);
+//         LeftBack.spin(forward, leftSpeed, percent);
+//         LeftMiddle.spin(forward, leftSpeed, percent);
+//       }
+//     }
 
   
 }
@@ -239,18 +237,18 @@ void usercontrol(void) {
       }
 
       else {
-        IntakeS2.setVelocity(80, pct);
+        // IntakeS2.setVelocity(100, pct);
       }
 
 
     if (Controller1.ButtonLeft.PRESSED){
       shawtyBae = 1;
-      WallStakesMacro(4.5);
+      WallStakesMacro(5.5);
     }
 
     if(Controller1.ButtonUp.pressing()){
       if ( shawtyBae == 1) {
-      wait (200, msec);
+      wait (100, msec);
       IntakeS2.spin(reverse,20, pct);
       wait (900, msec);
       IntakeS2.stop();

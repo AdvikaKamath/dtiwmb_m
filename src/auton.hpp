@@ -153,31 +153,13 @@ Mogo.set(true);
 
 
 void RightAuto (){
-    double distToMogo = -31;
-  double fwdLength = 23;
+    double distToMogo = -23.5; //-31;
+    double dist2Mogo = -26;
+  double fwdLength = 35;
   double ladder = 35;
   bool debug = false;
   bool skills = false; 
-     // Set to true to see mssages on controller
-
-   if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(reverse,100, pct);
-  IntakeS2.spin(reverse,100, pct);
-  vex::this_thread::sleep_for(200);
-
- if (debug) CtrlDbgPrt("Go to rings");
-  goStraight (5,true);
-
-  if (debug) CtrlDbgPrt("Intake spin");
-  IntakeS1.spin(forward,100, pct);
-  IntakeS2.spin(forward,100, pct);
-    vex::this_thread::sleep_for(800);
-    
-
-     // Stop intake
-  IntakeS1.stop();
-  IntakeS2.stop();
-  if (debug) CtrlDbgPrt("Intake Stop");
+    //  Set to true to see mssages on controll
  
 
     // All motors run at the same speed
@@ -187,11 +169,20 @@ void RightAuto (){
   // Make it go forward
   if (debug) CtrlDbgPrt("Go Forward");
   goStraight(distToMogo, true); // Robot starts in reverse position
+ 
+  LeftMotorGrp.setVelocity(35, pct);
+  RightMotorGrp.setVelocity(35, pct);
+
+  // Make it go forward
+  if (debug) CtrlDbgPrt("Go Forward");
+  goStraight(dist2Mogo, true); // Robot starts in reverse position
+  LeftMotorGrp.setVelocity(40, pct);
+  RightMotorGrp.setVelocity(40, pct);
 
   // mOGO CLAMP
   
   if (debug) CtrlDbgPrt("MOGO");
-  vex::this_thread::sleep_for(1000); // Need this not to clamp too soon
+  vex::this_thread::sleep_for(1100); // Need this not to clamp too soon
   Mogo.set(true);
 
   //Run intake
@@ -203,17 +194,13 @@ void RightAuto (){
 
   // Turn
   if (debug) CtrlDbgPrt("Turn to rings");
-  turn(-80.0, false);
+  turn(-175.0, false);
+
 
   vex::this_thread::sleep_for(1600);
   if (debug) CtrlDbgPrt("Go to rings");
   goStraight (fwdLength,true);
-    
-      vex::this_thread::sleep_for(200);
-   turn(10.0, false);
-    vex::this_thread::sleep_for(200); 
-
-
+   
 
   //turn
   vex::this_thread::sleep_for(2300);  
@@ -221,7 +208,7 @@ void RightAuto (){
   IntakeS1.stop();
   IntakeS2.stop();
   if (debug) CtrlDbgPrt("Intake Stop");
-  
+  return;
   turn(-140.0, true);
   if (debug) CtrlDbgPrt("Turn to ladder");  
    vex::this_thread::sleep_for(1000);
